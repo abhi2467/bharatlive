@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block title %}BharatLive TV — Indian television, live{% endblock %}</title>
+<meta name="description" content="{% block desc %}Watch live Indian TV channels — news, entertainment, movies, music, sports and devotional — all in one simple place.{% endblock %}">
+<meta name="theme-color" content="#0f1226">
+<link rel="icon" href="{{ url_for('static', filename='images/favicon.svg') }}">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<header class="site-header"><div class="wrap bar">
+  <a class="brand" href="{{ url_for('home') }}"><i></i><span>Bharat<b>Live</b> TV</span></a>
+  <nav aria-label="Main">
+    {% for ep, label in [('home','Home'),('categories','Categories'),('about','About')] %}
+    <a href="{{ url_for(ep) }}"{% if request.endpoint == ep %} aria-current="page"{% endif %}>{{ label }}</a>
+    {% endfor %}
+  </nav>
+</div></header>
+<main>{% block content %}{% endblock %}</main>
+<footer class="site-footer"><div class="wrap foot">
+  <span>© {{ year }} BharatLive TV</span>
+  <span>Channel names, logos and broadcasts belong to their respective owners.</span>
+</div></footer>
+<script>window.CATS = {{ categories|tojson }};</script>
+<script src="{{ url_for('static', filename='js/common.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

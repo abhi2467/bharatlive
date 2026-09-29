@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block title %}{{ code }} — BharatLive TV{% endblock %}
+{% block content %}
+<section class="wrap err">
+  <h1>{{ code }}</h1>
+  <p>{% if code == 404 %}We couldn’t find that page.{% else %}Something went wrong on our side. Please try again.{% endif %}</p>
+  <a class="btn primary" href="{{ url_for('home') }}">Back to live TV</a>
+</section>
+{% endblock %}

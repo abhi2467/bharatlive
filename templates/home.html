@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="wrap intro">
+  <h1>Indian television, live.</h1>
+  <p>Pick a channel and start watching. No sign-up, no clutter.</p>
+</section>
+<section class="wrap stage">
+  <div>
+    <div class="screen">
+      <video id="video" controls playsinline></video>
+      <div class="veil" id="veil">
+        <div class="ring" id="veilIcon">▶</div>
+        <h3 id="veilTitle">Loading channels…</h3>
+        <p id="veilText">One moment.</p>
+        <button class="btn sm" id="retry" hidden>Try again</button>
+      </div>
+    </div>
+    <div class="now">
+      <div class="logo" id="nowLogo"></div>
+      <div class="now-txt"><span class="live">● LIVE</span><h2 id="nowName">No channel selected</h2><p id="nowMeta">Pick a channel from the list</p></div>
+      <button class="btn" id="favBtn">☆ Save</button>
+    </div>
+    <p class="note">Channels are streamed by their broadcasters and can go offline at any time. If one doesn’t load, simply try another.</p>
+  </div>
+  <aside class="rail" aria-label="Channels">
+    <div class="rail-head"><h3>Channels</h3><span id="count">—</span></div>
+    <input class="field" id="q" type="search" placeholder="Search channels" autocomplete="off" aria-label="Search channels">
+    <div class="chips" id="chips"></div>
+    <div class="list" id="list"></div>
+  </aside>
+</section>
+{% endblock %}
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1.6.13/dist/hls.min.js" crossorigin="anonymous"></script>
+<script src="{{ url_for('static', filename='js/player.js') }}"></script>
+{% endblock %}

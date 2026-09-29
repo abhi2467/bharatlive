@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %}About — BharatLive TV{% endblock %}
+{% block desc %}BharatLive TV brings live Indian television channels together on one simple page. Learn the idea and how it works.{% endblock %}
+{% block content %}
+<section class="wrap intro">
+  <h1>Live Indian TV, without the hunt.</h1>
+  <p>BharatLive TV is one simple place to watch live Indian television. Every channel you can watch for free, sorted so you find what you want in seconds.</p>
+</section>
+<section class="wrap about">
+  <h2>The idea</h2>
+  <p>Watching TV online in India often means juggling apps, logins and links that stopped working last week. It should feel closer to picking up a remote: choose a channel, and watch.</p>
+  <p>So we built one calm page that brings live channels together — news, entertainment, movies, music, sports, kids and devotional — and then stays out of your way.</p>
+
+  <h2>How it works</h2>
+  <ol class="steps">
+    <li><b>Open Home</b><span>A channel starts playing as soon as the page loads. Nothing to install and no account to create.</span></li>
+    <li><b>Choose what you like</b><span>Search by name or filter by category on Home, or open Categories to see everything at a glance.</span></li>
+    <li><b>Save your favourites</b><span>Star a channel and it waits for you in your Saved list. Saved channels stay on your own device.</span></li>
+  </ol>
+
+  <h2>What we do for you</h2>
+  <div class="points">
+    <div><b>Keep the list fresh</b><span>The channel list is refreshed regularly, so new channels appear and dead ones drop away.</span></div>
+    <div><b>Sort it sensibly</b><span>Every channel sits in a category, so you can browse by mood instead of scrolling a long list.</span></div>
+    <div><b>Be honest when it fails</b><span>If a stream is offline, we say so plainly and let you move on to another channel.</span></div>
+    <div><b>Work on any screen</b><span>Phone, tablet or computer — the page adapts and works in any modern browser.</span></div>
+  </div>
+
+  <h2>Good to know</h2>
+  <p>BharatLive TV does not own, produce or host any channel. Broadcasts, names and logos belong to their respective owners, and availability depends on each broadcaster. Some channels may be offline, or unavailable in your region, from time to time.</p>
+  {% if contact_email %}<p>Own a channel and want its listing updated or removed? Write to <a class="link" href="mailto:{{ contact_email }}">{{ contact_email }}</a>.</p>{% endif %}
+  <p><a class="btn primary" href="{{ url_for('home') }}">Start watching</a></p>
+</section>
+{% endblock %}
