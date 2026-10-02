@@ -2,8 +2,12 @@
 {% block title %}{{ code }} — BharatLive TV{% endblock %}
 {% block content %}
 <section class="wrap err">
-  <h1>{{ code }}</h1>
-  <p>{% if code == 404 %}We couldn’t find that page.{% else %}Something went wrong on our side. Please try again.{% endif %}</p>
-  <a class="btn primary" href="{{ url_for('home') }}">Back to live TV</a>
+  <div class="err-inner">
+    <span class="err-kicker">Off the air</span>
+    <h1 class="err-code">{{ code }}</h1>
+    <h2>{% if code == 404 %}We lost the signal.{% else %}Something broke on our end.{% endif %}</h2>
+    <p>{% if code == 404 %}That page has moved, or the link is broken.{% else %}Please try again in a moment.{% endif %}</p>
+    <a class="btn btn-solid" href="{{ url_for('home') }}">Back to live TV</a>
+  </div>
 </section>
 {% endblock %}

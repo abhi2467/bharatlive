@@ -58,8 +58,11 @@ def parse_m3u(text):
         if line.startswith('#EXTINF'):
             attrs = dict(re.findall(r'([\w-]+)="([^"]*)"', line))
             name = line.split(',', 1)[1].strip() if ',' in line else attrs.get('tvg-name', 'Untitled')
-            pending = {'name': clean_name(name), 'logo': attrs.get('tvg-logo', ''),
-                       'category': categorize(attrs.get('group-title', ''), name)}
+            pending = {
+                'name': clean_name(name),
+                'logo': attrs.get('tvg-logo', ''),
+                'category': categorize(attrs.get('group-title', ''), name),
+            }
         elif pending and not line.startswith('#'):
             base = slugify(pending['name'])
             seen[base] = seen.get(base, 0) + 1

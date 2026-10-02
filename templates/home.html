@@ -1,34 +1,94 @@
 {% extends 'base.html' %}
+{% block title %}Watch live — BharatLive TV{% endblock %}
 {% block content %}
-<section class="wrap intro">
-  <h1>Indian television, live.</h1>
-  <p>Pick a channel and start watching. No sign-up, no clutter.</p>
+
+<section class="hero">
+  <div class="wrap hero-inner">
+    <span class="eyebrow"><span class="eyebrow-dot"></span> Live now · {{ categories|length }} categories</span>
+    <h1>Indian television, <em>live</em>.</h1>
+    <p>Pick a channel and start watching. No sign-up, no clutter, no queues.</p>
+  </div>
 </section>
+
 <section class="wrap stage">
-  <div>
-    <div class="screen">
-      <video id="video" controls playsinline></video>
+  <div class="player-col">
+
+    <div class="screen" id="screen">
+      <video id="video" controls playsinline preload="metadata"></video>
+
       <div class="veil" id="veil">
-        <div class="ring" id="veilIcon">▶</div>
-        <h3 id="veilTitle">Loading channels…</h3>
-        <p id="veilText">One moment.</p>
-        <button class="btn sm" id="retry" hidden>Try again</button>
+        <div class="veil-card">
+          <div class="veil-icon" id="veilIcon">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          </div>
+          <h3 id="veilTitle">Loading channels…</h3>
+          <p id="veilText">One moment.</p>
+          <button class="btn sm" id="retry" hidden type="button">Try again</button>
+        </div>
       </div>
     </div>
+
     <div class="now">
       <div class="logo" id="nowLogo"></div>
-      <div class="now-txt"><span class="live">● LIVE</span><h2 id="nowName">No channel selected</h2><p id="nowMeta">Pick a channel from the list</p></div>
-      <button class="btn" id="favBtn">☆ Save</button>
+      <div class="now-txt">
+        <span class="live" id="liveBadge"><i></i>LIVE</span>
+        <h2 id="nowName">No channel selected</h2>
+        <p id="nowMeta">Pick a channel from the list</p>
+      </div>
+      <div class="now-actions">
+        <button class="icon-btn" id="pipBtn" type="button" title="Picture in picture (P)" aria-label="Picture in picture">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="5" width="18" height="14" rx="2"/>
+            <rect x="12" y="12" width="7" height="5" rx="1" fill="currentColor" stroke="none"/>
+          </svg>
+        </button>
+        <button class="icon-btn" id="reloadBtn" type="button" title="Reload stream (R)" aria-label="Reload stream">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12a9 9 0 1 1-2.64-6.36"/>
+            <path d="M21 3v6h-6"/>
+          </svg>
+        </button>
+        <button class="btn save-btn" id="favBtn" type="button">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round">
+            <path d="m12 3 2.7 5.5 6 .9-4.3 4.2 1 6-5.4-2.8-5.4 2.8 1-6L3.3 9.4l6-.9z"/>
+          </svg>
+          <span>Save</span>
+        </button>
+      </div>
     </div>
-    <p class="note">Channels are streamed by their broadcasters and can go offline at any time. If one doesn’t load, simply try another.</p>
+
+    <p class="note">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg>
+      <span>Channels are streamed by their broadcasters and can go offline at any time. If one doesn’t load, try another.</span>
+    </p>
   </div>
-  <aside class="rail" aria-label="Channels">
-    <div class="rail-head"><h3>Channels</h3><span id="count">—</span></div>
-    <input class="field" id="q" type="search" placeholder="Search channels" autocomplete="off" aria-label="Search channels">
+
+  <aside class="rail" aria-label="Channel list">
+    <div class="rail-head">
+      <h3>Channels</h3>
+      <span id="count">—</span>
+    </div>
+
+    <label class="search" for="q">
+  <input class="field" id="q" type="search" placeholder="Search channels"
+         autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+  <kbd>/</kbd>
+</label>
+
     <div class="chips" id="chips"></div>
+
     <div class="list" id="list"></div>
+
+    <div class="kbd-hint">
+      <span><kbd>Space</kbd> play</span>
+      <span><kbd>M</kbd> mute</span>
+      <span><kbd>F</kbd> full</span>
+      <span><kbd>P</kbd> pip</span>
+      <span><kbd>R</kbd> reload</span>
+    </div>
   </aside>
 </section>
+
 {% endblock %}
 {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/hls.js@1.6.13/dist/hls.min.js" crossorigin="anonymous"></script>
