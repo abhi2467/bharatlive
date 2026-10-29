@@ -1,12 +1,56 @@
+import logging
 import re
 import time
 import unicodedata
 
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
-PLAYLIST_URL = 'https://iptv-org.github.io/iptv/languages/hin.m3u'
+logger = logging.getLogger(__name__)
+
+SOURCES = {
+    'hin': {'name': 'Hindi',      'url': 'https://iptv-org.github.io/iptv/languages/hin.m3u'},
+    'eng': {'name': 'English',    'url': 'https://iptv-org.github.io/iptv/languages/eng.m3u'},
+    'tam': {'name': 'Tamil',      'url': 'https://iptv-org.github.io/iptv/languages/tam.m3u'},
+    'tel': {'name': 'Telugu',     'url': 'https://iptv-org.github.io/iptv/languages/tel.m3u'},
+    'ben': {'name': 'Bengali',    'url': 'https://iptv-org.github.io/iptv/languages/ben.m3u'},
+    'mar': {'name': 'Marathi',    'url': 'https://iptv-org.github.io/iptv/languages/mar.m3u'},
+    'guj': {'name': 'Gujarati',   'url': 'https://iptv-org.github.io/iptv/languages/guj.m3u'},
+    'pan': {'name': 'Punjabi',    'url': 'https://iptv-org.github.io/iptv/languages/pan.m3u'},
+    'kan': {'name': 'Kannada',    'url': 'https://iptv-org.github.io/iptv/languages/kan.m3u'},
+    'mal': {'name': 'Malayalam',  'url': 'https://iptv-org.github.io/iptv/languages/mal.m3u'},
+    'urd': {'name': 'Urdu',       'url': 'https://iptv-org.github.io/iptv/languages/urd.m3u'},
+    'asm': {'name': 'Assamese',   'url': 'https://iptv-org.github.io/iptv/languages/asm.m3u'},
+    'in':  {'name': 'All India',  'url': 'https://iptv-org.github.io/iptv/countries/in.m3u'},
+}
+DEFAULT_SOURCE = 'hin'
+
+# iptv-org.github.io is served from the gh-pages branch of iptv-org/iptv, so
+# the same generated files are also reachable straight off raw.githubusercontent.com.
+# Some networks block one host but not the other, so each source is tried as a
+# small chain of mirrors instead of a single URL.
+def _mirrors(url):
+    urls = [url]
+    if 'iptv-org.github.io/iptv/' in url:
+        urls.append(url.replace(
+            'https://iptv-org.github.io/iptv/',
+            'https://raw.githubusercontent.com/iptv-org/iptv/gh-pages/',
+        ))
+    return urls
+
+
 CACHE_TTL = 900
-_cache = {'time': 0, 'channels': []}
+STALE_GRACE = 24 * 60 * 60  # serve a stale cached list for up to a day rather than erroring
+REQUEST_TIMEOUT = 20
+
+_session = requests.Session()
+_session.headers.update({'User-Agent': 'BharatLiveTV/1.0'})
+_retry = Retry(total=2, backoff_factor=0.5, status_forcelist=(429, 500, 502, 503, 504))
+_session.mount('https://', HTTPAdapter(max_retries=_retry))
+_session.mount('http://', HTTPAdapter(max_retries=_retry))
+
+_cache = {}  # source id -> {'time': ..., 'channels': [...]}
 
 CATEGORIES = [
     {'slug': 'news', 'name': 'News', 'blurb': 'Headlines and live coverage'},
@@ -73,17 +117,39 @@ def parse_m3u(text):
     return items
 
 
-def get_channels(force=False):
+def _fetch(source):
+    """Try each mirror for a source in turn; return parsed channels or raise
+    the last error with every attempt's reason logged."""
+    errors = []
+    for url in _mirrors(SOURCES[source]['url']):
+        try:
+            r = _session.get(url, timeout=REQUEST_TIMEOUT)
+            r.raise_for_status()
+            data = parse_m3u(r.text)
+            if not data:
+                raise ValueError('playlist fetched but contained no channels')
+            return data
+        except Exception as e:
+            errors.append(f'{url} -> {type(e).__name__}: {e}')
+    logger.warning("Couldn't fetch source '%s':\n  %s", source, '\n  '.join(errors))
+    raise RuntimeError(f"all mirrors failed for source '{source}'")
+
+
+def get_channels(source=DEFAULT_SOURCE, force=False):
+    if source not in SOURCES:
+        source = DEFAULT_SOURCE
+
     now = time.time()
-    if not force and _cache['channels'] and now - _cache['time'] < CACHE_TTL:
-        return _cache['channels']
+    entry = _cache.setdefault(source, {'time': 0, 'channels': []})
+    if not force and entry['channels'] and now - entry['time'] < CACHE_TTL:
+        return entry['channels']
     try:
-        r = requests.get(PLAYLIST_URL, timeout=15, headers={'User-Agent': 'BharatLiveTV/1.0'})
-        r.raise_for_status()
-        data = parse_m3u(r.text)
-        _cache.update(time=now, channels=data)
+        data = _fetch(source)
+        entry['time'], entry['channels'] = now, data
         return data
     except Exception:
-        if _cache['channels']:
-            return _cache['channels']
+        # Network hiccup or a mirror down: keep serving the last good list
+        # for a while rather than showing "unavailable" over a transient blip.
+        if entry['channels'] and now - entry['time'] < STALE_GRACE:
+            return entry['channels']
         raise

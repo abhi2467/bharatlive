@@ -1,6 +1,6 @@
 from datetime import datetime
 from flask import Flask, jsonify, render_template, request
-from services.playlist import CATEGORIES, get_channels
+from services.playlist import CATEGORIES, SOURCES, DEFAULT_SOURCE, get_channels
 
 app = Flask(__name__)
 app.config['JSON_SORT_KEYS'] = False
@@ -11,6 +11,8 @@ CONTACT_EMAIL = ''  # e.g. 'hello@yourdomain.com'
 def inject_globals():
     return {
         'categories': CATEGORIES,
+        'sources': SOURCES,
+        'default_source': DEFAULT_SOURCE,
         'year': datetime.now().year,
         'contact_email': CONTACT_EMAIL,
     }
@@ -36,11 +38,15 @@ def about():
 
 @app.route('/api/channels')
 def api_channels():
+    source = request.args.get('source', DEFAULT_SOURCE)
+    if source not in SOURCES:
+        source = DEFAULT_SOURCE
     try:
-        data = get_channels(force=request.args.get('refresh') == '1')
-    except Exception:
+        data = get_channels(source=source, force=request.args.get('refresh') == '1')
+    except Exception as e:
+        app.logger.warning('api_channels(%s) failed: %s', source, e)
         return jsonify(success=False, channels=[], error='Channel list is temporarily unavailable.'), 502
-    response = jsonify(success=True, count=len(data), channels=data)
+    response = jsonify(success=True, count=len(data), source=source, channels=data)
     response.headers['Cache-Control'] = 'public, max-age=300, stale-while-revalidate=600'
     return response
 
