@@ -31,6 +31,14 @@
       <span class="onair"><i></i>On air</span>
     </div>
   </div>
+
+  <div class="source-bar" aria-label="Channel source">
+    <div class="wrap source-bar-inner" id="sourceBar" role="group">
+      {% for sid, s in sources.items() %}
+        <button class="src-chip{% if sid == default_source %} on{% endif %}" data-id="{{ sid }}" type="button">{{ s.name }}</button>
+      {% endfor %}
+    </div>
+  </div>
 </header>
 
 <main>{% block content %}{% endblock %}</main>
@@ -45,7 +53,11 @@
   </div>
 </footer>
 
-<script>window.CATS = {{ categories|tojson }};</script>
+<script>
+  window.CATS = {{ categories|tojson }};
+  window.SOURCES = {{ sources|tojson }};
+  window.DEFAULT_SOURCE = {{ default_source|tojson }};
+</script>
 <script src="{{ url_for('static', filename='js/common.js') }}"></script>
 {% block scripts %}{% endblock %}
 </body>
